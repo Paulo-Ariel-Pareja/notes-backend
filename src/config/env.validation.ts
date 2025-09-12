@@ -6,7 +6,6 @@ import {
   IsOptional,
   IsBoolean,
   MinLength,
-  IsIn,
   validateSync,
 } from 'class-validator';
 
