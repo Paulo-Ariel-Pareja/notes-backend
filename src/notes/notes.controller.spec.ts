@@ -473,53 +473,6 @@ describe('NotesController', () => {
       });
     });
 
-    describe('getNoteSharedLinks', () => {
-      it('should return public links for specific note', async () => {
-        const mockPublicLink: PublicLink = {
-          id: 'link-id',
-          publicId: 'public-id',
-          noteId: 'note-id',
-          note: mockNote,
-          createdById: 'user-id',
-          createdBy: mockUser,
-          description: 'Test public link',
-          viewCount: 0,
-          lastAccessedAt: undefined,
-          expiresAt: undefined,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          generatePublicId: jest.fn(),
-          isExpired: jest.fn().mockReturnValue(false),
-          isActive: jest.fn().mockReturnValue(true),
-          recordAccess: jest.fn(),
-          setExpiration: jest.fn(),
-          makePermament: jest.fn(),
-          isOwnedBy: jest.fn().mockReturnValue(true),
-          getPublicUrl: jest.fn().mockReturnValue('/public/notes/public-id'),
-          getStats: jest.fn().mockReturnValue({
-            viewCount: 0,
-            lastAccessedAt: undefined,
-            createdAt: new Date(),
-            isExpired: false,
-            isActive: true,
-          }),
-        };
-
-        mockPublicLinksService.findByNoteAndOwner.mockResolvedValue([
-          mockPublicLink,
-        ]);
-
-        const result = await controller.getNoteSharedLinks('note-id', mockUser);
-
-        expect(mockPublicLinksService.findByNoteAndOwner).toHaveBeenCalledWith(
-          'note-id',
-          mockUser.id,
-        );
-        expect(result).toHaveLength(1);
-        expect(result[0].publicId).toBe('public-id');
-      });
-    });
-
     describe('updateSharedNote', () => {
       it('should update public link successfully', async () => {
         const updatePublicLinkDto: UpdatePublicLinkDto = {

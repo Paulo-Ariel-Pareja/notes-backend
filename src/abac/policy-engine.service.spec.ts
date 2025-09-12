@@ -204,7 +204,7 @@ describe('PolicyEngineService', () => {
         expect(result).toBe(true);
       });
 
-      it('should allow admin from sharing notes', async () => {
+      it('should allow admin to share their own note', async () => {
         const context: PolicyContext = {
           user: {
             id: 'admin-1',

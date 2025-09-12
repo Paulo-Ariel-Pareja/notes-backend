@@ -18,6 +18,9 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { NotesService } from './notes.service';
 import { PublicLinksService } from '../public-links/public-links.service';
@@ -63,6 +66,21 @@ export class NotesController {
     private readonly publicLinksService: PublicLinksService,
   ) {}
 
+  @ApiOperation({
+    summary: 'Create new note',
+    description: 'Create a new note for the authenticated user',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Note created successfully',
+    type: NoteResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
   @Post()
   @RequireNoteCreate()
   @HttpCode(HttpStatus.CREATED)
@@ -79,6 +97,18 @@ export class NotesController {
     return plainToInstance(NoteResponseDto, note);
   }
 
+  @ApiOperation({
+    summary: 'Get user notes',
+    description: 'Retrieve notes for the authenticated user with search and pagination',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Notes retrieved successfully',
+    type: PaginatedNotesDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
   @Get()
   async findAll(
     @CurrentUser() currentUser: User,
@@ -100,12 +130,36 @@ export class NotesController {
     });
   }
 
+  @ApiOperation({
+    summary: 'Get note statistics',
+    description: 'Get statistics about user notes (total, active, archived, etc.)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistics retrieved successfully',
+    type: NoteStatsDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
   @Get('stats')
   async getStats(@CurrentUser() currentUser: User): Promise<NoteStatsDto> {
     const stats = await this.notesService.getUserNoteStats(currentUser.id);
     return new NoteStatsDto(stats);
   }
 
+  @ApiOperation({
+    summary: 'Get recent notes',
+    description: 'Get the most recently created notes for the user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recent notes retrieved successfully',
+    type: [NoteResponseDto],
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
   @Get('recent')
   async getRecent(
     @CurrentUser() currentUser: User,
@@ -115,6 +169,21 @@ export class NotesController {
     return notes.map((note) => plainToInstance(NoteResponseDto, note));
   }
 
+  @ApiOperation({
+    summary: 'Get shared notes',
+    description: 'Get all public links created by the user for their shared notes',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Shared notes retrieved successfully',
+    type: PaginatedPublicLinksDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Insufficient permissions',
+  })
   @Get('shared')
   @RequirePublicLinkList()
   async getSharedNotes(
@@ -138,6 +207,25 @@ export class NotesController {
     });
   }
 
+  @ApiOperation({
+    summary: 'Get note by ID',
+    description: 'Retrieve a specific note by its ID (owner only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Note retrieved successfully',
+    type: NoteResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Note not found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Access denied - not the owner',
+  })
   @Get(':id')
   @RequireNoteRead('id')
   async findOne(
@@ -152,6 +240,28 @@ export class NotesController {
     return plainToInstance(NoteResponseDto, note);
   }
 
+  @ApiOperation({
+    summary: 'Update note',
+    description: 'Update a note (owner only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Note updated successfully',
+    type: NoteResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Note not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Access denied - not the owner',
+  })
   @Patch(':id')
   @RequireNoteUpdate('id')
   async update(
@@ -167,6 +277,27 @@ export class NotesController {
     return plainToInstance(NoteResponseDto, note);
   }
 
+  @ApiOperation({
+    summary: 'Delete note',
+    description: 'Delete a note (owner only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Note deleted successfully',
+    example: {
+      message: 'Note deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Note not found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Access denied - not the owner',
+  })
   @Delete(':id')
   @RequireNoteDelete('id')
   @HttpCode(HttpStatus.OK)
@@ -176,6 +307,28 @@ export class NotesController {
     return { message: 'Note deleted successfully' };
   }
 
+  @ApiOperation({
+    summary: 'Share note',
+    description: 'Create a public link to share a note (owner only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Public link created successfully',
+    type: PublicLinkResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Note not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Access denied - not the owner or sharing not allowed',
+  })
   @Post(':id/share')
   @RequireNoteShare('id')
   @RequirePublicLinkCreate()
@@ -199,6 +352,28 @@ export class NotesController {
     return plainToInstance(PublicLinkResponseDto, publicLink);
   }
 
+  @ApiOperation({
+    summary: 'Update shared note link',
+    description: 'Update a public link for a shared note (owner only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Public link updated successfully',
+    type: PublicLinkResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Public link not found',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Access denied - not the owner',
+  })
   @Patch('shared/:publicId')
   @RequirePublicLinkDelete()
   async updateSharedNote(
@@ -228,6 +403,27 @@ export class NotesController {
     return plainToInstance(PublicLinkResponseDto, updatedLink);
   }
 
+  @ApiOperation({
+    summary: 'Delete shared note link',
+    description: 'Delete a public link for a shared note (owner only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Public link deleted successfully',
+    example: {
+      message: 'Public link deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Public link not found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Access denied - not the owner',
+  })
   @Delete('shared/:publicId')
   @RequirePublicLinkDelete()
   @HttpCode(HttpStatus.OK)
@@ -240,6 +436,21 @@ export class NotesController {
     return { message: 'Public link deleted successfully' };
   }
 
+  @ApiOperation({
+    summary: 'Get sharing statistics',
+    description: 'Get statistics about user public links and sharing activity',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sharing statistics retrieved successfully',
+    type: PublicLinkStatsDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Insufficient permissions',
+  })
   @Get('shared/stats')
   @RequirePublicLinkList()
   async getSharingStats(

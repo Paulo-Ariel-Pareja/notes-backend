@@ -80,6 +80,34 @@ export class UsersController {
    * @param limit - Items per page
    * @returns Paginated users
    */
+  @ApiOperation({
+    summary: 'Get all users',
+    description: 'Retrieve all users with pagination (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Users retrieved successfully',
+    example: {
+      users: [
+        {
+          id: 'uuid-string',
+          email: 'user@example.com',
+          role: 'user',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      total: 1,
+      page: 1,
+      totalPages: 1,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Admin role required',
+  })
   @Get()
   @RequireAdminRole()
   async findAll(
@@ -99,6 +127,25 @@ export class UsersController {
    * @param id - User ID
    * @returns User data
    */
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Retrieve a specific user by their ID (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Admin role required',
+  })
   @Get(':id')
   @RequireAdminRole()
   async findOne(@Param('id') id: string): Promise<UserResponseDto> {
@@ -117,6 +164,23 @@ export class UsersController {
    * @param currentUser - Current authenticated user
    * @returns Success message
    */
+  @ApiOperation({
+    summary: 'Change user password',
+    description: 'Change password for the authenticated user',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed successfully',
+    example: {
+      message: 'Password changed successfully',
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or user mismatch',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
   @Patch(':id/password')
   @HttpCode(HttpStatus.OK)
   async changePassword(
@@ -138,6 +202,27 @@ export class UsersController {
    * @param id - User ID
    * @returns Success message
    */
+  @ApiOperation({
+    summary: 'Delete user',
+    description: 'Delete a user account (admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User deleted successfully',
+    example: {
+      message: 'User deleted successfully',
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Authentication required',
+  })
+  @ApiForbiddenResponse({
+    description: 'Admin role required',
+  })
   @Delete(':id')
   @RequireAdminRole()
   @HttpCode(HttpStatus.OK)

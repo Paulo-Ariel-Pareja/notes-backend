@@ -78,11 +78,6 @@ export class PolicyEngineService {
   ): boolean {
     const actualValue = this.getAttributeValue(condition.attribute, context);
     let expectedValue = condition.value;
-    console.log('Evaluating condition:', {
-      condition,
-      actualValue,
-      expectedValue,
-    });
 
     // If expectedValue is a string that looks like an attribute reference, resolve it
     if (typeof expectedValue === 'string' && expectedValue.includes('.')) {
@@ -220,7 +215,7 @@ export class PolicyEngineService {
         effect: 'allow',
       },
 
-      // Note share - Owner only (not admin)
+      // Note share - Owner only
       {
         id: 'note-share-owner',
         name: 'Allow users to share their own notes',
@@ -234,7 +229,7 @@ export class PolicyEngineService {
           },
           {
             attribute: 'user.role',
-            operator: ConditionOperator.EQUALS,
+            operator: ConditionOperator.IN,
             value: [UserRole.USER, UserRole.ADMIN],
           },
         ],

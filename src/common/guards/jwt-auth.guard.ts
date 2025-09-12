@@ -29,7 +29,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
-    console.log('JWT Auth Guard 2 - handleRequest called');
 
     if (err || !user) {
       const request = context.switchToHttp().getRequest();
