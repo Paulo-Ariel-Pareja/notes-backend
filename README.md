@@ -54,7 +54,7 @@ cp .env.example .env
 # Editar .env con tus configuraciones
 ```
 
-5. Iniciar el servidor:
+4. Iniciar el servidor:
 ```bash
 # Desarrollo
 yarn start:dev
@@ -74,6 +74,21 @@ yarn test:e2e
 
 # Cobertura de código
 yarn test:cov
+```
+## 🐳 Docker
+
+- Este proyecto incluye soporte para Docker.
+- Puedes construir y ejecutar el backend usando contenedores para facilitar el despliegue y la portabilidad.
+
+### Comandos básicos
+
+```bash
+# Construir la imagen
+yarn run docker:dev
+```
+```bash
+yarn run docker:prod
+
 ```
 
 ## 📚 API Documentation

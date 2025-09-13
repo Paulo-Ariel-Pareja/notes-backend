@@ -43,7 +43,7 @@ export default () => ({
       process.env.APP_DESCRIPTION || 'Notes management backend service',
     globalPrefix: process.env.GLOBAL_PREFIX || 'api',
     saUser: process.env.SA_USER || 'superuser@notes.com',
-    saPassword: process.env.superpassword || 'superpassword',
+    saPassword: process.env.SA_PASSWORD || 'superpassword',
     swaggerEnabled: process.env.SWAGGER_ENABLED !== 'false',
     swaggerPath: process.env.SWAGGER_PATH || 'docs',
   },

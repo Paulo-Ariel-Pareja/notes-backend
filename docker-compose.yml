@@ -1,0 +1,96 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: notes-postgres-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: notes_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5433:5432"
+    networks:
+      - notes-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notes_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Notes Backend Service
+  notes-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: notes-backend-prod
+    restart: unless-stopped
+    environment:
+      # Application
+      PORT: 3000
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres123
+      DB_DATABASE: notes_db
+      DB_SSL: false
+      DB_SYNCHRONIZE: true
+      DB_LOGGING: false
+      DB_MAX_CONNECTIONS: 10
+      DB_CONNECTION_TIMEOUT: 30000
+      
+      # JWT
+      JWT_SECRET: .7D06}8lfWAG:L<byZ2%Y£/x>>E£bRL7
+      JWT_EXPIRES_IN: 24h
+      JWT_ISSUER: notes-backend
+      JWT_AUDIENCE: notes-app
+      
+      # Security
+      BCRYPT_ROUNDS: 12
+      CORS_ORIGIN: "*"
+      RATE_LIMIT_TTL: 60
+      RATE_LIMIT_LIMIT: 100
+      
+      # Application Config
+      APP_NAME: Notes Backend
+      APP_VERSION: 1.0.0
+      APP_DESCRIPTION: Notes management backend service
+      GLOBAL_PREFIX: api
+      SA_USER: adminprod@notes.com
+      SA_PASSWORD: produccion
+      SWAGGER_ENABLED: false
+      SWAGGER_PATH: docs
+      
+      # Logging
+      LOG_LEVEL: info
+      LOG_FORMAT: combined
+      LOG_CONSOLE: true
+      LOG_FILE: false
+    ports:
+      - "3001:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - notes-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  notes-network:
+    driver: bridge

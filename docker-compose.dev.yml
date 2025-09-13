@@ -1,0 +1,77 @@
+name: notes-backend-dev
+services:
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: notes-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: notes_db_dev
+      POSTGRES_USER: notes_user
+      POSTGRES_PASSWORD: notes123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+     - "5434:5432"
+    networks:
+      - notes-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U notes_user -d notes_db_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  notes-backend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: notes-backend-dev
+    restart: unless-stopped
+    environment:
+      # Application
+      NODE_ENV: development
+      PORT: 3000
+      
+      # Database
+      DB_HOST: postgres-dev
+      DB_PORT: 5432
+      DB_USERNAME: notes_user
+      DB_PASSWORD: notes123
+      DB_DATABASE: notes_db_dev
+      DB_SSL: false
+      DB_SYNCHRONIZE: true
+      DB_LOGGING: true
+      
+      # JWT
+      JWT_SECRET: VeryHardSup3rS3cretKeyForThisApplication.
+      JWT_EXPIRES_IN: 24h
+      
+      # Application Config
+      SA_USER: admindev@notes.com
+      SA_PASSWORD: desarrollo
+      SWAGGER_ENABLED: true
+      
+      # Logging
+      LOG_LEVEL: debug
+      LOG_CONSOLE: true
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"  # Different port for dev
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+    networks:
+      - notes-dev-network
+    command: ["yarn", "run", "start:dev"]
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  notes-dev-network:
+    driver: bridge

@@ -63,9 +63,9 @@ export class AppConfigService {
     return {
       host: this.configService.get<string>('database.host', 'localhost'),
       port: this.configService.get<number>('database.port', 5432),
-      username: this.configService.get<string>('database.username', 'postgres'),
-      password: this.configService.get<string>('database.password', 'password'),
-      database: this.configService.get<string>('database.database', 'notes_db'),
+      username: this.configService.getOrThrow<string>('database.username'),
+      password: this.configService.getOrThrow<string>('database.password'),
+      database: this.configService.getOrThrow<string>('database.database'),
       ssl: this.configService.get<boolean>('database.ssl', false),
       synchronize: this.configService.get<boolean>(
         'database.synchronize',
@@ -89,18 +89,22 @@ export class AppConfigService {
         'jwt.secret',
         'fallback-secret-key',
       ),
-      expiresIn: this.configService.get<string>('jwt.expiresIn', '1h'),
-      issuer: this.configService.get<string>('jwt.issuer', 'notes-backend'),
-      audience: this.configService.get<string>('jwt.audience', 'notes-app'),
+      expiresIn: this.configService.getOrThrow<string>('jwt.expiresIn'),
+      issuer: this.configService.getOrThrow<string>('jwt.issuer'),
+      audience: this.configService.getOrThrow<string>('jwt.audience'),
     };
   }
 
   get security(): SecurityConfig {
     return {
-      bcryptRounds: this.configService.get<number>('security.bcryptRounds', 12),
-      corsOrigin: this.configService.get<string>('security.corsOrigin', '*'),
-      rateLimitTtl: this.configService.get<number>('security.rateLimitTtl', 60),
-      rateLimitLimit: this.configService.get<number>(
+      bcryptRounds: this.configService.getOrThrow<number>(
+        'security.bcryptRounds',
+      ),
+      corsOrigin: this.configService.getOrThrow<string>('security.corsOrigin'),
+      rateLimitTtl: this.configService.getOrThrow<number>(
+        'security.rateLimitTtl',
+      ),
+      rateLimitLimit: this.configService.getOrThrow<number>(
         'security.rateLimitLimit',
         100,
       ),
@@ -116,8 +120,8 @@ export class AppConfigService {
         'Notes management backend service',
       ),
       globalPrefix: this.configService.get<string>('app.globalPrefix', 'api'),
-      saUser: this.configService.get<string>('app.saUser', 'superuser@notes.com'),
-      saPassword: this.configService.get<string>('app.saPassword', 'superpassword'),
+      saUser: this.configService.getOrThrow<string>('app.saUser'),
+      saPassword: this.configService.getOrThrow<string>('app.saPassword'),
       swaggerEnabled: this.configService.get<boolean>(
         'app.swaggerEnabled',
         true,
