@@ -69,9 +69,6 @@ yarn start:prod
 # Tests unitarios
 yarn test
 
-# Tests de integración
-yarn test:e2e
-
 # Cobertura de código
 yarn test:cov
 ```
