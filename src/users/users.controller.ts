@@ -12,6 +12,8 @@ import {
   HttpStatus,
   ParseIntPipe,
   DefaultValuePipe,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -38,11 +40,6 @@ import { AbacGuard } from '../abac/guards/abac.guard';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  /**
-   * Create a new user (Admin only)
-   * @param createUserDto - User creation data
-   * @returns Created user
-   */
   @ApiOperation({
     summary: 'Create new user',
     description: 'Create a new user account (admin only)',
@@ -74,12 +71,6 @@ export class UsersController {
     return plainToInstance(UserResponseDto, user);
   }
 
-  /**
-   * Get all users with pagination (Admin only)
-   * @param page - Page number
-   * @param limit - Items per page
-   * @returns Paginated users
-   */
   @ApiOperation({
     summary: 'Get all users',
     description: 'Retrieve all users with pagination (admin only)',
@@ -122,11 +113,6 @@ export class UsersController {
     };
   }
 
-  /**
-   * Get user by ID (Admin only)
-   * @param id - User ID
-   * @returns User data
-   */
   @ApiOperation({
     summary: 'Get user by ID',
     description: 'Retrieve a specific user by their ID (admin only)',
@@ -151,19 +137,12 @@ export class UsersController {
   async findOne(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.usersService.findById(id);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     return plainToInstance(UserResponseDto, user);
   }
 
-  /**
-   * Change user password
-   * @param id - User ID
-   * @param changePasswordDto - Password change data
-   * @param currentUser - Current authenticated user
-   * @returns Success message
-   */
   @ApiOperation({
     summary: 'Change user password',
     description: 'Change password for the authenticated user',
@@ -189,7 +168,7 @@ export class UsersController {
     @CurrentUser() currentUser: User,
   ) {
     if (currentUser.id !== id) {
-      throw new Error('You can only change your own password');
+      throw new ForbiddenException('You can only change your own password');
     }
 
     await this.usersService.changePassword(id, changePasswordDto.password);
@@ -197,11 +176,6 @@ export class UsersController {
     return { message: 'Password changed successfully' };
   }
 
-  /**
-   * Delete user (Admin only)
-   * @param id - User ID
-   * @returns Success message
-   */
   @ApiOperation({
     summary: 'Delete user',
     description: 'Delete a user account (admin only)',

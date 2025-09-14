@@ -12,6 +12,8 @@ import {
   HttpStatus,
   ParseIntPipe,
   DefaultValuePipe,
+  NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -237,7 +239,7 @@ export class NotesController {
   ): Promise<NoteResponseDto> {
     const note = await this.notesService.findByIdAndOwner(id, currentUser.id);
     if (!note) {
-      throw new Error('Note not found');
+      throw new NotFoundException('Note not found');
     }
 
     return plainToInstance(NoteResponseDto, note);
@@ -386,7 +388,7 @@ export class NotesController {
   ): Promise<PublicLinkResponseDto> {
     const publicLink = await this.publicLinksService.getByPublicId(publicId);
     if (!publicLink || publicLink.createdById !== currentUser.id) {
-      throw new Error(
+      throw new ForbiddenException(
         'Public link not found or you do not have permission to update it',
       );
     }
