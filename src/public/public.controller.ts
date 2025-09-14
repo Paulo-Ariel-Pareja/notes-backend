@@ -16,11 +16,6 @@ import { plainToInstance } from 'class-transformer';
 export class PublicController {
   constructor(private readonly publicLinksService: PublicLinksService) {}
 
-  /**
-   * Get public note by public ID (no authentication required)
-   * @param publicId - Public ID of the shared note
-   * @returns Note data if accessible
-   */
   @ApiOperation({
     summary: 'Get public note',
     description:
@@ -78,10 +73,6 @@ export class PublicController {
     return plainToInstance(NoteResponseDto, note);
   }
 
-  /**
-   * Health check endpoint for public access
-   * @returns Health status
-   */
   @ApiOperation({
     summary: 'Public health check',
     description:
