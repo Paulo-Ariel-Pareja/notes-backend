@@ -6,13 +6,10 @@ import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class JwtAuthService {
-  private readonly expiresIn: string;
   constructor(
     private readonly jwtService: NestJwtService,
     private readonly configService: ConfigService,
-  ) {
-    this.expiresIn = this.configService.get<string>('jwt.expiresIn') || '1h';
-  }
+  ) {}
 
   generateToken(user: User): string {
     const payload: JwtPayload = {
@@ -33,9 +30,9 @@ export class JwtAuthService {
   }
 
   getTokenExpirationTime(): number {
-    const timeUnit = this.expiresIn.slice(-1);
-    const timeValue = parseInt(this.expiresIn.slice(0, -1));
-
+    const config = this.configService.getOrThrow<string>('jwt.expiresIn');
+    const timeUnit = config.slice(-1).toLowerCase();
+    const timeValue = parseInt(config.slice(0, -1));
     if (isNaN(timeValue)) return 3600;
 
     switch (timeUnit) {

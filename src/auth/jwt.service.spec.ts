@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtAuthService } from './jwt.service';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../common/enums/user-role.enum';
+import { time } from 'console';
 
 describe('JwtAuthService', () => {
   let service: JwtAuthService;
@@ -36,6 +37,7 @@ describe('JwtAuthService', () => {
 
   const mockConfigService = {
     get: jest.fn(),
+    getOrThrow: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -117,36 +119,52 @@ describe('JwtAuthService', () => {
   });
 
   describe('getTokenExpirationTime', () => {
-    it('should return expiration time in seconds for hours', () => {
-      mockConfigService.get.mockReturnValue('2h');
+    it('should return expiration time in seconds for seconds', () => {
+      mockConfigService.getOrThrow.mockReturnValue('10s');
 
       const result = service.getTokenExpirationTime();
 
-      expect(result).toBe(3600);
+      expect(result).toBe(10);
     });
 
-    it('should return expiration time in seconds for minutes', () => {
-      mockConfigService.get.mockReturnValue('30m');
+    it('should return expiration time in seconds for hours', () => {
+      mockConfigService.getOrThrow.mockReturnValue('2h');
 
       const result = service.getTokenExpirationTime();
 
       expect(result).toBe(7200);
     });
 
-    it('should return expiration time in seconds for days', () => {
-      mockConfigService.get.mockReturnValue('1d');
+    it('should return expiration time in seconds for minutes', () => {
+      mockConfigService.getOrThrow.mockReturnValue('30m');
 
       const result = service.getTokenExpirationTime();
 
       expect(result).toBe(1800);
     });
 
-    it('should return default expiration time for invalid format', () => {
-      mockConfigService.get.mockReturnValue('invalid');
+    it('should return expiration time in seconds for days', () => {
+      mockConfigService.getOrThrow.mockReturnValue('1d');
 
       const result = service.getTokenExpirationTime();
 
       expect(result).toBe(86400);
+    });
+
+    it('should return default expiration time for invalid format', () => {
+      mockConfigService.getOrThrow.mockReturnValue('120x');
+
+      const result = service.getTokenExpirationTime();
+
+      expect(result).toBe(3600);
+    });
+
+    it('should return default expiration time for invalid format', () => {
+      mockConfigService.getOrThrow.mockReturnValue('invalid');
+
+      const result = service.getTokenExpirationTime();
+
+      expect(result).toBe(3600);
     });
   });
 });
