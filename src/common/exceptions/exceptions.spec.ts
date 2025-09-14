@@ -47,6 +47,28 @@ import {
 
 describe('Custom Exceptions', () => {
   describe('Business Exceptions', () => {
+    it('should create BusinessException with custom status code', () => {
+      class TestBusinessException extends BusinessException {
+        constructor() {
+          super('Test business error', HttpStatus.CONFLICT);
+        }
+      }
+      const exception = new TestBusinessException();
+      expect(exception.message).toBe('Test business error');
+      expect(exception.getStatus()).toBe(HttpStatus.CONFLICT);
+    });
+
+    it('should create BusinessException with default status code', () => {
+      class TestBusinessException extends BusinessException {
+        constructor() {
+          super('Test business error');
+        }
+      }
+      const exception = new TestBusinessException();
+      expect(exception.message).toBe('Test business error');
+      expect(exception.getStatus()).toBe(HttpStatus.BAD_REQUEST);
+    });
+
     it('should create ResourceOwnershipException with correct message and status', () => {
       const exception = new ResourceOwnershipException('note');
       expect(exception.message).toBe(
@@ -289,6 +311,28 @@ describe('Custom Exceptions', () => {
   });
 
   describe('Validation Exceptions', () => {
+    it('should create ValidationException with custom status code', () => {
+      class TestValidationException extends ValidationException {
+        constructor() {
+          super('Test validation error', HttpStatus.NOT_ACCEPTABLE);
+        }
+      }
+      const exception = new TestValidationException();
+      expect(exception.message).toBe('Test validation error');
+      expect(exception.getStatus()).toBe(HttpStatus.NOT_ACCEPTABLE);
+    });
+
+    it('should create ValidationException with default status code', () => {
+      class TestValidationException extends ValidationException {
+        constructor() {
+          super('Test validation error');
+        }
+      }
+      const exception = new TestValidationException();
+      expect(exception.message).toBe('Test validation error');
+      expect(exception.getStatus()).toBe(HttpStatus.BAD_REQUEST);
+    });
+
     it('should create MissingRequiredFieldException', () => {
       const exception = new MissingRequiredFieldException('email');
       expect(exception.message).toBe("Required field 'email' is missing");
