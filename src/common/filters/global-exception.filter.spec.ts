@@ -1,6 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus, BadRequestException, NotFoundException, ForbiddenException, ArgumentsHost } from '@nestjs/common';
-import { GlobalExceptionFilter, ErrorResponse } from './global-exception.filter';
+import {
+  HttpException,
+  HttpStatus,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+  ArgumentsHost,
+} from '@nestjs/common';
+import {
+  GlobalExceptionFilter,
+  ErrorResponse,
+} from './global-exception.filter';
 import { QueryFailedError } from 'typeorm';
 import { Response, Request } from 'express';
 
@@ -225,7 +235,9 @@ describe('GlobalExceptionFilter', () => {
 
       filter.catch(exception, mockHost);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.status).toHaveBeenCalledWith(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -359,12 +371,14 @@ describe('GlobalExceptionFilter', () => {
       const exception2 = new BadRequestException('Error 2');
 
       filter.catch(exception1, mockHost);
-      const firstResponse = ((mockResponse.json as jest.Mock).mock.calls[0][0] as ErrorResponse);
+      const firstResponse = (mockResponse.json as jest.Mock).mock
+        .calls[0][0] as ErrorResponse;
 
       jest.clearAllMocks();
 
       filter.catch(exception2, mockHost);
-      const secondResponse = ((mockResponse.json as jest.Mock).mock.calls[0][0] as ErrorResponse);
+      const secondResponse = (mockResponse.json as jest.Mock).mock
+        .calls[0][0] as ErrorResponse;
 
       expect(firstResponse.requestId).toBeDefined();
       expect(secondResponse.requestId).toBeDefined();
@@ -413,7 +427,9 @@ describe('GlobalExceptionFilter', () => {
 
       filter.catch(customError, mockHost);
 
-      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.status).toHaveBeenCalledWith(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
       expect(mockResponse.json).toHaveBeenCalledWith(
         expect.objectContaining({
           statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
