@@ -23,13 +23,11 @@ export class DatabaseInitService implements OnModuleInit {
     const adminEmail = this.configService.app.saUser;
     const adminPassword = this.configService.app.saPassword;
 
-    // Verificar si ya existe un usuario admin
     const existingAdmin = await this.userRepository.findOne({
       where: { role: UserRole.ADMIN },
     });
 
     if (!existingAdmin) {
-      // Crear usuario admin
       const hashedPassword =
         await this.passwordService.hashPassword(adminPassword);
 

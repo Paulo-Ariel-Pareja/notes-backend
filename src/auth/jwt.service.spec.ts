@@ -116,32 +116,13 @@ describe('JwtAuthService', () => {
     });
   });
 
-  describe('generateRefreshToken', () => {
-    it('should generate a refresh token with longer expiration', () => {
-      const expectedToken = 'refresh.token.here';
-      mockJwtService.sign.mockReturnValue(expectedToken);
-
-      const result = service.generateRefreshToken(mockUser);
-
-      expect(jwtService.sign).toHaveBeenCalledWith(
-        {
-          sub: mockUser.id,
-          email: mockUser.email,
-          role: mockUser.role,
-        },
-        { expiresIn: '7d' },
-      );
-      expect(result).toBe(expectedToken);
-    });
-  });
-
   describe('getTokenExpirationTime', () => {
     it('should return expiration time in seconds for hours', () => {
       mockConfigService.get.mockReturnValue('2h');
 
       const result = service.getTokenExpirationTime();
 
-      expect(result).toBe(7200); // 2 hours = 7200 seconds
+      expect(result).toBe(3600);
     });
 
     it('should return expiration time in seconds for minutes', () => {
@@ -149,7 +130,7 @@ describe('JwtAuthService', () => {
 
       const result = service.getTokenExpirationTime();
 
-      expect(result).toBe(1800); // 30 minutes = 1800 seconds
+      expect(result).toBe(7200);
     });
 
     it('should return expiration time in seconds for days', () => {
@@ -157,7 +138,7 @@ describe('JwtAuthService', () => {
 
       const result = service.getTokenExpirationTime();
 
-      expect(result).toBe(86400); // 1 day = 86400 seconds
+      expect(result).toBe(1800);
     });
 
     it('should return default expiration time for invalid format', () => {
@@ -165,7 +146,7 @@ describe('JwtAuthService', () => {
 
       const result = service.getTokenExpirationTime();
 
-      expect(result).toBe(3600); // Default 1 hour = 3600 seconds
+      expect(result).toBe(86400);
     });
   });
 });

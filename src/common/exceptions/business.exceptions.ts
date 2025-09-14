@@ -4,7 +4,10 @@ import { HttpException, HttpStatus } from '@nestjs/common';
  * Base class for business logic exceptions
  */
 export abstract class BusinessException extends HttpException {
-  constructor(message: string, statusCode: HttpStatus = HttpStatus.BAD_REQUEST) {
+  constructor(
+    message: string,
+    statusCode: HttpStatus = HttpStatus.BAD_REQUEST,
+  ) {
     super(message, statusCode);
   }
 }
@@ -14,7 +17,10 @@ export abstract class BusinessException extends HttpException {
  */
 export class ResourceOwnershipException extends BusinessException {
   constructor(resourceType: string = 'resource') {
-    super(`You do not have permission to access this ${resourceType}`, HttpStatus.FORBIDDEN);
+    super(
+      `You do not have permission to access this ${resourceType}`,
+      HttpStatus.FORBIDDEN,
+    );
   }
 }
 
@@ -23,8 +29,8 @@ export class ResourceOwnershipException extends BusinessException {
  */
 export class NoteNotFoundException extends BusinessException {
   constructor(noteId?: string) {
-    const message = noteId 
-      ? `Note with ID '${noteId}' not found` 
+    const message = noteId
+      ? `Note with ID '${noteId}' not found`
       : 'Note not found';
     super(message, HttpStatus.NOT_FOUND);
   }
@@ -35,8 +41,8 @@ export class NoteNotFoundException extends BusinessException {
  */
 export class UserNotFoundException extends BusinessException {
   constructor(identifier?: string) {
-    const message = identifier 
-      ? `User with identifier '${identifier}' not found` 
+    const message = identifier
+      ? `User with identifier '${identifier}' not found`
       : 'User not found';
     super(message, HttpStatus.NOT_FOUND);
   }
@@ -47,8 +53,8 @@ export class UserNotFoundException extends BusinessException {
  */
 export class PublicLinkNotFoundException extends BusinessException {
   constructor(publicId?: string) {
-    const message = publicId 
-      ? `Public link with ID '${publicId}' not found` 
+    const message = publicId
+      ? `Public link with ID '${publicId}' not found`
       : 'Public link not found';
     super(message, HttpStatus.NOT_FOUND);
   }
@@ -104,8 +110,8 @@ export class IncorrectCurrentPasswordException extends BusinessException {
  */
 export class EmailAlreadyExistsException extends BusinessException {
   constructor(email?: string) {
-    const message = email 
-      ? `Email '${email}' is already registered` 
+    const message = email
+      ? `Email '${email}' is already registered`
       : 'Email is already registered';
     super(message, HttpStatus.CONFLICT);
   }
@@ -116,8 +122,8 @@ export class EmailAlreadyExistsException extends BusinessException {
  */
 export class InsufficientPermissionsException extends BusinessException {
   constructor(operation?: string) {
-    const message = operation 
-      ? `Insufficient permissions to perform '${operation}'` 
+    const message = operation
+      ? `Insufficient permissions to perform '${operation}'`
       : 'Insufficient permissions';
     super(message, HttpStatus.FORBIDDEN);
   }
@@ -158,8 +164,8 @@ export class ResourceHasDependenciesException extends BusinessException {
  */
 export class InvalidOperationException extends BusinessException {
   constructor(operation: string, reason?: string) {
-    const message = reason 
-      ? `Cannot perform '${operation}': ${reason}` 
+    const message = reason
+      ? `Cannot perform '${operation}': ${reason}`
       : `Operation '${operation}' is not allowed`;
     super(message, HttpStatus.BAD_REQUEST);
   }

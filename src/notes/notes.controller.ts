@@ -99,7 +99,8 @@ export class NotesController {
 
   @ApiOperation({
     summary: 'Get user notes',
-    description: 'Retrieve notes for the authenticated user with search and pagination',
+    description:
+      'Retrieve notes for the authenticated user with search and pagination',
   })
   @ApiResponse({
     status: 200,
@@ -132,7 +133,8 @@ export class NotesController {
 
   @ApiOperation({
     summary: 'Get note statistics',
-    description: 'Get statistics about user notes (total, active, archived, etc.)',
+    description:
+      'Get statistics about user notes (total, active, archived, etc.)',
   })
   @ApiResponse({
     status: 200,
@@ -171,7 +173,8 @@ export class NotesController {
 
   @ApiOperation({
     summary: 'Get shared notes',
-    description: 'Get all public links created by the user for their shared notes',
+    description:
+      'Get all public links created by the user for their shared notes',
   })
   @ApiResponse({
     status: 200,

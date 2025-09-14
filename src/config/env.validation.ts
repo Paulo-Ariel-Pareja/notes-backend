@@ -31,7 +31,6 @@ class EnvironmentVariables {
   @Transform(({ value }) => parseInt(value, 10))
   PORT: number = 3000;
 
-  // Database Configuration
   @IsString()
   DB_HOST: string = 'localhost';
 
@@ -73,7 +72,6 @@ class EnvironmentVariables {
   @Transform(({ value }) => parseInt(value, 10))
   DB_CONNECTION_TIMEOUT?: number = 30000;
 
-  // JWT Configuration
   @IsString()
   @MinLength(32, {
     message:
@@ -92,7 +90,6 @@ class EnvironmentVariables {
   @IsString()
   JWT_AUDIENCE?: string = 'notes-app';
 
-  // Security Configuration
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value, 10))
@@ -112,7 +109,6 @@ class EnvironmentVariables {
   @Transform(({ value }) => parseInt(value, 10))
   RATE_LIMIT_LIMIT?: number = 100;
 
-  // Application Configuration
   @IsOptional()
   @IsString()
   APP_NAME?: string = 'Notes Backend';
@@ -138,7 +134,6 @@ class EnvironmentVariables {
   @IsString()
   SWAGGER_PATH?: string = 'docs';
 
-  // Logging Configuration
   @IsOptional()
   @IsEnum(LogLevel)
   LOG_LEVEL?: LogLevel = LogLevel.Info;
@@ -182,7 +177,6 @@ export function validate(config: Record<string, unknown>) {
     throw new Error(`Environment validation failed:\n${errorMessages}`);
   }
 
-  // Additional production-specific validations
   if (validatedConfig.NODE_ENV === Environment.Production) {
     validateProductionConfig(validatedConfig);
   }
@@ -193,7 +187,6 @@ export function validate(config: Record<string, unknown>) {
 function validateProductionConfig(config: EnvironmentVariables) {
   const productionErrors: string[] = [];
 
-  // Ensure JWT secret is strong in production
   if (
     config.JWT_SECRET === 'fallback-secret-key' ||
     config.JWT_SECRET.length < 32
@@ -203,35 +196,30 @@ function validateProductionConfig(config: EnvironmentVariables) {
     );
   }
 
-  // Ensure database password is not default
   if (config.DB_PASSWORD === 'password') {
     productionErrors.push(
       'DB_PASSWORD must not use default values in production',
     );
   }
 
-  // Ensure SSL is enabled for production database
   if (!config.DB_SSL) {
     productionErrors.push(
       'DB_SSL should be enabled in production for security',
     );
   }
 
-  // Ensure synchronize is disabled in production
   if (config.DB_SYNCHRONIZE) {
     productionErrors.push(
       'DB_SYNCHRONIZE must be disabled in production to prevent data loss',
     );
   }
 
-  // Ensure CORS is properly configured
   if (config.CORS_ORIGIN === '*') {
     productionErrors.push(
       'CORS_ORIGIN should not be wildcard (*) in production',
     );
   }
 
-  // Ensure Swagger is disabled in production
   if (config.SWAGGER_ENABLED) {
     productionErrors.push(
       'SWAGGER_ENABLED should be disabled in production for security',

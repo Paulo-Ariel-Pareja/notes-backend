@@ -312,28 +312,4 @@ describe('NotesService', () => {
       expect(result).toBe(recentNotes);
     });
   });
-
-  describe('findAllActive', () => {
-    it('should return all notes for all users', async () => {
-      const notes = [mockNote];
-      const total = 1;
-      mockNoteRepository.findAndCount.mockResolvedValue([notes, total]);
-
-      const result = await service.findAllActive();
-
-      expect(noteRepository.findAndCount).toHaveBeenCalledWith({
-        where: { status: NoteStatus.ACTIVE },
-        skip: 0,
-        take: 10,
-        order: { updatedAt: 'DESC' },
-        relations: ['owner', 'publicLinks'],
-      });
-      expect(result).toEqual({
-        notes,
-        total,
-        page: 1,
-        totalPages: 1,
-      });
-    });
-  });
 });

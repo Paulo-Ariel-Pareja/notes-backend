@@ -15,7 +15,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly userRepository: Repository<User>,
   ) {
     const jwtConfig = configService.jwt;
-    
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -25,16 +24,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  /**
-   * Validate JWT payload and return user
-   * This method is called automatically by Passport after token verification
-   * @param payload - Decoded JWT payload
-   * @returns User entity or throws UnauthorizedException
-   */
   async validate(payload: JwtPayload): Promise<User> {
     const { sub: userId } = payload;
 
-    // Find user by ID from the token
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -43,7 +35,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found');
     }
 
-    // Return user object (will be attached to request.user)
     return user;
   }
 }

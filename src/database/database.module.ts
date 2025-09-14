@@ -22,15 +22,13 @@ import { PasswordService } from '../common/services/password.service';
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           synchronize: dbConfig.synchronize,
           logging: dbConfig.logging,
-          maxQueryExecutionTime: 1000, // Log slow queries
+          maxQueryExecutionTime: 1000,
           extra: {
             max: dbConfig.maxConnections,
             connectionTimeoutMillis: dbConfig.connectionTimeout,
             idleTimeoutMillis: 30000,
           },
-          // Connection pool settings
           poolSize: dbConfig.maxConnections,
-          // Retry connection
           retryAttempts: 3,
           retryDelay: 3000,
         };

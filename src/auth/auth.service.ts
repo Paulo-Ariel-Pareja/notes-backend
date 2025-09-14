@@ -18,11 +18,6 @@ export class AuthService {
     private readonly jwtAuthService: JwtAuthService,
   ) {}
 
-  /**
-   * Authenticate user with email and password
-   * @param loginDto - Login credentials
-   * @returns Login response with JWT token
-   */
   async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
 
@@ -41,7 +36,6 @@ export class AuthService {
 
     if (!isPasswordValid) throw new UnauthorizedException(this.loginError);
 
-    // Generate JWT token
     const accessToken = this.jwtAuthService.generateToken(user);
     const expiresIn = this.jwtAuthService.getTokenExpirationTime();
 

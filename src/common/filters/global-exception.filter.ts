@@ -33,7 +33,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     const errorResponse = this.buildErrorResponse(exception, request);
 
-    // Log the error with context
     this.logError(exception, request, errorResponse);
 
     response.status(errorResponse.statusCode).json(errorResponse);
@@ -130,7 +129,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       return 'Invalid data provided';
     }
 
-    // Generic database error message
     return 'Database operation failed';
   }
 

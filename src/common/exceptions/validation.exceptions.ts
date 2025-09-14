@@ -4,7 +4,10 @@ import { HttpException, HttpStatus } from '@nestjs/common';
  * Base class for validation exceptions
  */
 export abstract class ValidationException extends HttpException {
-  constructor(message: string, statusCode: HttpStatus = HttpStatus.BAD_REQUEST) {
+  constructor(
+    message: string,
+    statusCode: HttpStatus = HttpStatus.BAD_REQUEST,
+  ) {
     super(message, statusCode);
   }
 }
@@ -23,8 +26,8 @@ export class MissingRequiredFieldException extends ValidationException {
  */
 export class InvalidFieldFormatException extends ValidationException {
   constructor(fieldName: string, expectedFormat?: string) {
-    const message = expectedFormat 
-      ? `Invalid format for field '${fieldName}'. Expected: ${expectedFormat}` 
+    const message = expectedFormat
+      ? `Invalid format for field '${fieldName}'. Expected: ${expectedFormat}`
       : `Invalid format for field '${fieldName}'`;
     super(message, HttpStatus.BAD_REQUEST);
   }
@@ -36,7 +39,7 @@ export class InvalidFieldFormatException extends ValidationException {
 export class FieldOutOfRangeException extends ValidationException {
   constructor(fieldName: string, min?: number, max?: number) {
     let message = `Field '${fieldName}' is out of range`;
-    
+
     if (min !== undefined && max !== undefined) {
       message += `. Must be between ${min} and ${max}`;
     } else if (min !== undefined) {
@@ -44,7 +47,7 @@ export class FieldOutOfRangeException extends ValidationException {
     } else if (max !== undefined) {
       message += `. Must be at most ${max}`;
     }
-    
+
     super(message, HttpStatus.BAD_REQUEST);
   }
 }
@@ -54,8 +57,8 @@ export class FieldOutOfRangeException extends ValidationException {
  */
 export class FieldTooLongException extends ValidationException {
   constructor(fieldName: string, maxLength: number, actualLength?: number) {
-    const lengthInfo = actualLength 
-      ? ` (${actualLength} characters provided)` 
+    const lengthInfo = actualLength
+      ? ` (${actualLength} characters provided)`
       : '';
     super(
       `Field '${fieldName}' exceeds maximum length of ${maxLength} characters${lengthInfo}`,
@@ -69,8 +72,8 @@ export class FieldTooLongException extends ValidationException {
  */
 export class FieldTooShortException extends ValidationException {
   constructor(fieldName: string, minLength: number, actualLength?: number) {
-    const lengthInfo = actualLength 
-      ? ` (${actualLength} characters provided)` 
+    const lengthInfo = actualLength
+      ? ` (${actualLength} characters provided)`
       : '';
     super(
       `Field '${fieldName}' must be at least ${minLength} characters${lengthInfo}`,
@@ -84,8 +87,8 @@ export class FieldTooShortException extends ValidationException {
  */
 export class InvalidEmailFormatException extends ValidationException {
   constructor(email?: string) {
-    const message = email 
-      ? `Invalid email format: '${email}'` 
+    const message = email
+      ? `Invalid email format: '${email}'`
       : 'Invalid email format';
     super(message, HttpStatus.BAD_REQUEST);
   }
@@ -97,11 +100,11 @@ export class InvalidEmailFormatException extends ValidationException {
 export class WeakPasswordException extends ValidationException {
   constructor(requirements?: string[]) {
     let message = 'Password does not meet security requirements';
-    
+
     if (requirements && requirements.length > 0) {
       message += ': ' + requirements.join(', ');
     }
-    
+
     super(message, HttpStatus.BAD_REQUEST);
   }
 }
@@ -137,15 +140,15 @@ export class InvalidUuidFormatException extends ValidationException {
 export class InvalidDateFormatException extends ValidationException {
   constructor(fieldName: string, value?: string, expectedFormat?: string) {
     let message = `Invalid date format for field '${fieldName}'`;
-    
+
     if (value) {
       message += ` '${value}'`;
     }
-    
+
     if (expectedFormat) {
       message += `. Expected format: ${expectedFormat}`;
     }
-    
+
     super(message, HttpStatus.BAD_REQUEST);
   }
 }
