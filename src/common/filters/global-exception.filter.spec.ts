@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpException, HttpStatus, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { GlobalExceptionFilter } from './global-exception.filter';
+import { HttpException, HttpStatus, BadRequestException, NotFoundException, ForbiddenException, ArgumentsHost } from '@nestjs/common';
+import { GlobalExceptionFilter, ErrorResponse } from './global-exception.filter';
 import { QueryFailedError } from 'typeorm';
+import { Response, Request } from 'express';
 
 describe('GlobalExceptionFilter', () => {
   let filter: GlobalExceptionFilter;
-  let mockResponse: any;
-  let mockRequest: any;
-  let mockHost: any;
+  let mockResponse: Partial<Response>;
+  let mockRequest: Partial<Request>;
+  let mockHost: ArgumentsHost;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,15 +33,15 @@ describe('GlobalExceptionFilter', () => {
 
     mockHost = {
       switchToHttp: jest.fn().mockReturnValue({
-        getResponse: () => mockResponse,
-        getRequest: () => mockRequest,
+        getResponse: () => mockResponse as Response,
+        getRequest: () => mockRequest as Request,
       }),
       getArgs: jest.fn(),
       getArgByIndex: jest.fn(),
       switchToRpc: jest.fn(),
       switchToWs: jest.fn(),
       getType: jest.fn(),
-    } as any;
+    } as ArgumentsHost;
   });
 
   afterEach(() => {
@@ -235,6 +236,93 @@ describe('GlobalExceptionFilter', () => {
       );
     });
 
+    it('should handle check constraint violations in QueryFailedError', () => {
+      const exception = new QueryFailedError(
+        'INSERT INTO users',
+        [],
+        new Error('check constraint violation'),
+      );
+
+      filter.catch(exception, mockHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Invalid data provided',
+          error: 'Database Error',
+        }),
+      );
+    });
+
+    it('should handle generic database errors in QueryFailedError', () => {
+      const exception = new QueryFailedError(
+        'SELECT * FROM users',
+        [],
+        new Error('Some other database error'),
+      );
+
+      filter.catch(exception, mockHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Database operation failed',
+          error: 'Database Error',
+        }),
+      );
+    });
+
+    it('should handle error with permission denied message', () => {
+      const exception = new Error('Permission denied');
+
+      filter.catch(exception, mockHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.FORBIDDEN);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: HttpStatus.FORBIDDEN,
+          message: 'Permission denied',
+          error: 'Error',
+        }),
+      );
+    });
+
+    it('should handle error with invalid data message', () => {
+      const exception = new Error('Invalid data');
+
+      filter.catch(exception, mockHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Invalid data',
+          error: 'Error',
+        }),
+      );
+    });
+
+    it('should log other errors as info', () => {
+      const logSpy = jest.spyOn(filter['logger'], 'log');
+      const exception = new HttpException('Info message', HttpStatus.CONTINUE);
+
+      filter.catch(exception, mockHost);
+
+      expect(logSpy).toHaveBeenCalled();
+      expect(logSpy.mock.calls[0][0]).toContain('Request Error');
+      expect(logSpy.mock.calls[0][1]).toEqual(
+        expect.objectContaining({
+          method: 'GET',
+          url: '/test',
+          ip: '127.0.0.1',
+          userAgent: 'test-agent',
+          userId: 'Anonymous',
+        }),
+      );
+    });
+
     it('should include user information in request context when available', () => {
       const mockRequestWithUser = {
         ...mockRequest,
@@ -271,16 +359,110 @@ describe('GlobalExceptionFilter', () => {
       const exception2 = new BadRequestException('Error 2');
 
       filter.catch(exception1, mockHost);
-      const firstCall = mockResponse.json.mock.calls[0][0];
+      const firstResponse = ((mockResponse.json as jest.Mock).mock.calls[0][0] as ErrorResponse);
 
       jest.clearAllMocks();
 
       filter.catch(exception2, mockHost);
-      const secondCall = mockResponse.json.mock.calls[0][0];
+      const secondResponse = ((mockResponse.json as jest.Mock).mock.calls[0][0] as ErrorResponse);
 
-      expect(firstCall.requestId).toBeDefined();
-      expect(secondCall.requestId).toBeDefined();
-      expect(firstCall.requestId).not.toBe(secondCall.requestId);
+      expect(firstResponse.requestId).toBeDefined();
+      expect(secondResponse.requestId).toBeDefined();
+      expect(firstResponse.requestId).not.toBe(secondResponse.requestId);
+    });
+
+    it('should handle HttpException with empty response', () => {
+      const exception = new HttpException({}, HttpStatus.BAD_REQUEST);
+
+      filter.catch(exception, mockHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: expect.any(String),
+        }),
+      );
+    });
+
+    it('should log server errors correctly', () => {
+      const loggerSpy = jest.spyOn(filter['logger'], 'error');
+      const exception = new Error('Server error');
+
+      filter.catch(exception, mockHost);
+
+      expect(loggerSpy).toHaveBeenCalled();
+      expect(loggerSpy.mock.calls[0][0]).toContain('Server Error');
+      expect(loggerSpy.mock.calls[0][2]).toEqual(
+        expect.objectContaining({
+          method: 'GET',
+          url: '/test',
+          ip: '127.0.0.1',
+          userAgent: 'test-agent',
+          userId: 'Anonymous',
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        }),
+      );
+    });
+
+    it('should handle custom error objects', () => {
+      const customError = {
+        name: 'CustomError',
+        message: 'Custom error message',
+      };
+
+      filter.catch(customError, mockHost);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: 'Internal server error',
+        }),
+      );
+    });
+
+    it('should include all required fields in error response', () => {
+      const exception = new BadRequestException('Test error');
+
+      filter.catch(exception, mockHost);
+
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: expect.any(Number),
+          timestamp: expect.any(String),
+          path: expect.any(String),
+          method: expect.any(String),
+          message: expect.any(String),
+          requestId: expect.any(String),
+        }),
+      );
+    });
+
+    it('should handle request with missing user-agent header', () => {
+      const mockRequestWithoutUserAgent = {
+        ...mockRequest,
+        headers: {},
+      };
+
+      const mockHostWithoutUserAgent = {
+        switchToHttp: jest.fn().mockReturnValue({
+          getResponse: () => mockResponse as Response,
+          getRequest: () => mockRequestWithoutUserAgent as Request,
+        }),
+        getArgs: jest.fn(),
+        getArgByIndex: jest.fn(),
+        switchToRpc: jest.fn(),
+        switchToWs: jest.fn(),
+        getType: jest.fn(),
+      } as ArgumentsHost;
+
+      const exception = new BadRequestException('Test error');
+
+      filter.catch(exception, mockHostWithoutUserAgent);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+      expect(mockResponse.json).toHaveBeenCalled();
     });
   });
 });
