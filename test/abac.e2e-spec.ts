@@ -71,7 +71,7 @@ describe('ABAC Authorization (e2e)', () => {
     it('should allow admin to delete users', async () => {
       const adminData = testHelper.generateUserData({ role: UserRole.ADMIN });
       const admin = await testHelper.createUser(adminData);
-      
+
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
@@ -85,7 +85,7 @@ describe('ABAC Authorization (e2e)', () => {
     it('should deny regular user from deleting users', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
@@ -102,7 +102,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user.token)
@@ -114,11 +117,14 @@ describe('ABAC Authorization (e2e)', () => {
     it('should deny user from reading another user notes', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
-      const note = await testHelper.createNote(user1.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user1.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user2.token)
@@ -131,7 +137,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user.token)
@@ -144,11 +153,14 @@ describe('ABAC Authorization (e2e)', () => {
     it('should deny user from updating another user notes', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
-      const note = await testHelper.createNote(user1.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user1.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user2.token)
@@ -162,7 +174,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user.token)
@@ -174,11 +189,14 @@ describe('ABAC Authorization (e2e)', () => {
     it('should false deny user from deleting another user notes', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
-      const note = await testHelper.createNote(user1.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user1.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user2.token)
@@ -193,7 +211,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user.token)
@@ -207,7 +228,10 @@ describe('ABAC Authorization (e2e)', () => {
       const adminData = testHelper.generateUserData({ role: UserRole.ADMIN });
       const admin = await testHelper.createUser(adminData);
 
-      const note = await testHelper.createNote(admin.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        admin.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(admin.token)
@@ -220,11 +244,14 @@ describe('ABAC Authorization (e2e)', () => {
     it('should deny user from sharing another user notes', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
-      const note = await testHelper.createNote(user1.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user1.token,
+        testHelper.generateNoteData(),
+      );
 
       const response = await testHelper
         .makeAuthenticatedRequest(user2.token)
@@ -240,7 +267,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // List own public links
@@ -269,12 +299,18 @@ describe('ABAC Authorization (e2e)', () => {
     it('should false deny user from managing another user public links', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
-      const note = await testHelper.createNote(user1.token, testHelper.generateNoteData());
-      const publicLink = await testHelper.createPublicLink(user1.token, note.id);
+      const note = await testHelper.createNote(
+        user1.token,
+        testHelper.generateNoteData(),
+      );
+      const publicLink = await testHelper.createPublicLink(
+        user1.token,
+        note.id,
+      );
 
       // Try to update another user's public link
       const updateResponse = await testHelper
@@ -309,7 +345,7 @@ describe('ABAC Authorization (e2e)', () => {
       testHelper.expectNotFound(response);
     });
 
-/*     it('should deny regular user from accessing admin notes endpoint', async () => {
+    /*     it('should deny regular user from accessing admin notes endpoint', async () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
@@ -337,7 +373,7 @@ describe('ABAC Authorization (e2e)', () => {
     it('should deny user from changing another user password', async () => {
       const userData1 = testHelper.generateUserData();
       const user1 = await testHelper.createUser(userData1);
-      
+
       const userData2 = testHelper.generateUserData();
       const user2 = await testHelper.createUser(userData2);
 
@@ -355,7 +391,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // User should be able to access their note
@@ -385,7 +424,10 @@ describe('ABAC Authorization (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // Delete the note
@@ -413,9 +455,7 @@ describe('ABAC Authorization (e2e)', () => {
     });
 
     it('should deny access without token', async () => {
-      const response = await testHelper
-        .makePublicRequest()
-        .get('/api/notes');
+      const response = await testHelper.makePublicRequest().get('/api/notes');
 
       testHelper.expectUnauthorized(response);
     });

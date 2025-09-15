@@ -21,10 +21,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:e2e:watch": "jest --config ./test/jest-e2e.json --watch",
-    "test:e2e:cov": "jest --config ./test/jest-e2e.json --coverage --coverageDirectory=coverage-e2e",
-    "test:e2e:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --config ./test/jest-e2e.json --runInBand",
-    "test:all": "npm run test && npm run test:e2e",
-    "test:all:cov": "npm run test:cov && npm run test:e2e:cov"
+    "test:all": "npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

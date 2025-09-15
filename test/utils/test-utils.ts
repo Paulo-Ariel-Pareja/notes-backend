@@ -56,27 +56,14 @@ export class TestHelper {
     if (!this.dataSource) return;
 
     try {
-      // Reset admin user cache
       this.adminUser = null;
 
       const entities = this.dataSource.entityMetadatas;
 
-      // Clear all tables in reverse order to handle foreign keys
       const entityNames = entities.map((entity) => entity.tableName);
 
-      // Disable foreign key checks for SQLite
-      if (this.dataSource.options.type === 'sqlite') {
-        await this.dataSource.query('PRAGMA foreign_keys = OFF');
-      }
-
-      // Clear all tables
       for (const tableName of entityNames) {
         await this.dataSource.query(`DELETE FROM "${tableName}"`);
-      }
-
-      // Re-enable foreign key checks for SQLite
-      if (this.dataSource.options.type === 'sqlite') {
-        await this.dataSource.query('PRAGMA foreign_keys = ON');
       }
     } catch (error) {
       console.warn('Error cleaning database:', error);
@@ -93,21 +80,17 @@ export class TestHelper {
     return this.app;
   }
 
-  // Authentication helpers
   async createUser(userData: {
     email: string;
     password: string;
     role?: UserRole;
   }): Promise<TestUser> {
-    // First, check if we need to create a super admin
     const isFirstUser = await this.isFirstUser();
 
     if (isFirstUser || userData.role === UserRole.ADMIN) {
-      // Create user directly in database for first user or admin
       return await this.createUserDirectly(userData);
     }
 
-    // For regular users, we need an admin to create them
     const admin = await this.ensureAdminExists();
 
     const response = await request(this.app.getHttpServer())
@@ -123,7 +106,6 @@ export class TestHelper {
       throw new Error(`Failed to create user: ${response.body.message}`);
     }
 
-    // Login to get token
     const loginResponse = await request(this.app.getHttpServer())
       .post('/api/auth/login')
       .send({
@@ -160,14 +142,12 @@ export class TestHelper {
     password: string;
     role?: UserRole;
   }): Promise<TestUser> {
-    // Import services to create user directly
     const bcrypt = require('bcrypt');
     const { randomUUID } = require('crypto');
 
     const hashedPassword = await bcrypt.hash(userData.password, 4);
     const userId = randomUUID();
 
-    // Use repository to create user (works with both SQLite and PostgreSQL)
     const userRepository = this.dataSource.getRepository('User');
     await userRepository.save({
       id: userId,
@@ -178,7 +158,6 @@ export class TestHelper {
       updatedAt: new Date(),
     });
 
-    // Login to get token
     const loginResponse = await request(this.app.getHttpServer())
       .post('/api/auth/login')
       .send({
@@ -205,7 +184,6 @@ export class TestHelper {
       return this.adminUser;
     }
 
-    // Generate unique admin email to avoid conflicts
     const timestamp = Date.now();
     this.adminUser = await this.createUserDirectly({
       email: `admin${timestamp}@test.com`,
@@ -228,7 +206,6 @@ export class TestHelper {
     return response.body.accessToken;
   }
 
-  // Note helpers
   async createNote(
     token: string,
     noteData: { title: string; description: string },
@@ -262,7 +239,6 @@ export class TestHelper {
     return response.body;
   }
 
-  // Request helpers
   makeAuthenticatedRequest(token: string) {
     return {
       get: (url: string) =>
@@ -291,7 +267,6 @@ export class TestHelper {
     };
   }
 
-  // Assertion helpers
   expectValidationError(response: any, field?: string): void {
     expect(response.status).toBe(400);
     expect(response.body.message).toBeDefined();
@@ -321,7 +296,6 @@ export class TestHelper {
     expect(response.body).toBeDefined();
   }
 
-  // Data generators
   generateUserData(
     overrides?: Partial<{
       email: string;
