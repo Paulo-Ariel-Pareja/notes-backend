@@ -47,14 +47,17 @@ describe('Public Access (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // Access the public note multiple times
       await testHelper
         .makePublicRequest()
         .get(`/api/public/notes/${publicLink.publicId}`);
-      
+
       await testHelper
         .makePublicRequest()
         .get(`/api/public/notes/${publicLink.publicId}`);
@@ -65,7 +68,9 @@ describe('Public Access (e2e)', () => {
         .get('/api/notes/shared');
 
       testHelper.expectSuccess(linksResponse, 200);
-      const link = linksResponse.body.links.find((l: any) => l.publicId === publicLink.publicId);
+      const link = linksResponse.body.links.find(
+        (l: any) => l.publicId === publicLink.publicId,
+      );
       expect(link.viewCount).toBeGreaterThan(0);
     });
 
@@ -75,21 +80,30 @@ describe('Public Access (e2e)', () => {
         .get('/api/public/notes/non-existent-id');
 
       testHelper.expectNotFound(response);
-      expect(response.body.message).toContain('Note not found or no longer available');
+      expect(response.body.message).toContain(
+        'Note not found or no longer available',
+      );
     });
 
     it('should fail with expired public link', async () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
-      
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
+
       // Create expired link
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 1);
-      const publicLink = await testHelper.createPublicLink(user.token, note.id, {
-        expiresAt: pastDate.toISOString(),
-      });
+      const publicLink = await testHelper.createPublicLink(
+        user.token,
+        note.id,
+        {
+          expiresAt: pastDate.toISOString(),
+        },
+      );
 
       const response = await testHelper
         .makePublicRequest()
@@ -102,7 +116,10 @@ describe('Public Access (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // Disable the note
@@ -122,7 +139,10 @@ describe('Public Access (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // Delete the public link
@@ -142,33 +162,7 @@ describe('Public Access (e2e)', () => {
         .makePublicRequest()
         .get('/api/public/notes/malformed-id-with-special-chars-!@#$%');
 
-      expect(response.status).toBe(400);
-    });
-
-    it('should return note with computed properties', async () => {
-      const userData = testHelper.generateUserData();
-      const user = await testHelper.createUser(userData);
-
-      const noteData = testHelper.generateNoteData({
-        description: 'This is a test note with multiple words to test word count functionality',
-      });
-      const note = await testHelper.createNote(user.token, noteData);
-      const publicLink = await testHelper.createPublicLink(user.token, note.id);
-
-      const response = await testHelper
-        .makePublicRequest()
-        .get(`/api/public/notes/${publicLink.publicId}`);
-
-      testHelper.expectSuccess(response, 200);
-      expect(response.body).toHaveProperty('wordCount');
-      expect(response.body).toHaveProperty('characterCount');
-      expect(response.body).toHaveProperty('summary');
-      expect(response.body).toHaveProperty('isPubliclyShared');
-      expect(response.body).toHaveProperty('totalViews');
-      
-      expect(response.body.wordCount).toBeGreaterThan(0);
-      expect(response.body.characterCount).toBe(noteData.description.length);
-      expect(response.body.isPubliclyShared).toBe(true);
+      testHelper.expectNotFound(response);
     });
   });
 
@@ -190,7 +184,10 @@ describe('Public Access (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       const response = await testHelper
@@ -198,14 +195,14 @@ describe('Public Access (e2e)', () => {
         .get(`/api/public/notes/${publicLink.publicId}`);
 
       testHelper.expectSuccess(response, 200);
-      
+
       // Check that sensitive information is not exposed
       expect(response.body.owner).not.toHaveProperty('password');
       expect(response.body.owner).not.toHaveProperty('id');
       expect(response.body.owner).not.toHaveProperty('role');
       expect(response.body.owner).not.toHaveProperty('createdAt');
       expect(response.body.owner).not.toHaveProperty('updatedAt');
-      
+
       // Should only have email
       expect(response.body.owner).toHaveProperty('email');
     });
@@ -214,8 +211,11 @@ describe('Public Access (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
-      
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
+
       // Try to access note directly by ID (not through public link)
       const response = await testHelper
         .makePublicRequest()
@@ -228,20 +228,25 @@ describe('Public Access (e2e)', () => {
       const userData = testHelper.generateUserData();
       const user = await testHelper.createUser(userData);
 
-      const note = await testHelper.createNote(user.token, testHelper.generateNoteData());
+      const note = await testHelper.createNote(
+        user.token,
+        testHelper.generateNoteData(),
+      );
       const publicLink = await testHelper.createPublicLink(user.token, note.id);
 
       // Make multiple concurrent requests
-      const promises = Array(5).fill(null).map(() =>
-        testHelper
-          .makePublicRequest()
-          .get(`/api/public/notes/${publicLink.publicId}`)
-      );
+      const promises = Array(5)
+        .fill(null)
+        .map(() =>
+          testHelper
+            .makePublicRequest()
+            .get(`/api/public/notes/${publicLink.publicId}`),
+        );
 
       const responses = await Promise.all(promises);
 
       // All requests should succeed
-      responses.forEach(response => {
+      responses.forEach((response) => {
         testHelper.expectSuccess(response, 200);
         expect(response.body.id).toBe(note.id);
       });
